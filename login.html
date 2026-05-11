@@ -1,0 +1,28 @@
+<div id="login-screen" style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+    <h2>Entrar no PatoChat</h2>
+    <input type="text" id="username" placeholder="Nome de usuário"><br><br>
+    <input type="password" id="password" placeholder="Senha"><br><br>
+    <button onclick="cadastrar()">Criar Conta</button>
+    <button onclick="logar()">Entrar</button>
+</div>
+
+<script>
+    function cadastrar() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        // Envia para o servidor na Render salvar no banco
+        socket.emit('novo usuario', { user, pass });
+    }
+
+    function logar() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        socket.emit('tentar login', { user, pass });
+    }
+
+    // Se o login der certo, a gente esconde a tela de login e mostra o chat
+    socket.on('login sucesso', () => {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('chat-container').style.display = 'block';
+    });
+</script>
