@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PatoChat - Online</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #e5ddd5; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        
+        /* Cabeçalho */
+        header { background-color: #075e54; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 20px; }
+
+        /* Área de Mensagens */
+        #chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        
+        .message { max-width: 70%; padding: 10px; border-radius: 10px; font-size: 16px; position: relative; }
+        .received { background-color: white; align-self: flex-start; }
+        .sent { background-color: #dcf8c6; align-self: flex-end; }
+
+        /* Barra de Digitação */
+        footer { background-color: #f0f0f0; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #ccc; }
+        input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
+        button { background-color: #075e54; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #128c7e; }
+    </style>
+</head>
+<body>
+
+    <header>PatoChat Online 🦆</header>
+
+    <div id="chat-container">
+        <!-- As mensagens vão aparecer aqui -->
+        <div class="message received">Bem-vindo ao Zap do Patinho!</div>
+    </div>
+
+    <footer>
+        <input type="text" id="msgInput" placeholder="Digite uma mensagem...">
+        <button onclick="enviarMensagem()">Enviar</button>
+    </footer>
+
+    <!-- Importando o Socket.io (essencial para o online) -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        // AQUI ESTÁ O SEGREDO: Conectar com o link da Render que você vai criar
+        const socket = io('https://SEU-PROJETO-NA-RENDER.onrender.com');
+
+        const container = document.getElementById('chat-container');
+        const input = document.getElementById('msgInput');
+
+        function enviarMensagem() {
+            const texto = input.value;
+            if (texto.trim() !== "") {
+                // Envia para o servidor na Render
+                socket.emit('chat message', texto);
+                
+                // Mostra na sua tela
+                adicionarMensagem(texto, 'sent');
+                input.value = '';
+            }
+        }
+
+        // Quando o servidor mandar uma mensagem de outra pessoa
+        socket.on('chat message', (msg) => {
+            adicionarMensagem(msg, 'received');
+        });
+
+        function adicionarMensagem(texto, tipo) {
+            const div = document.createElement('div');
+            div.className = `message ${tipo}`;
+            div.innerText = texto;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight; // Rola para baixo
+        }
+    </script>
+</body>
+</html>
