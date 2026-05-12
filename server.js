@@ -12,7 +12,6 @@ const io = new Server(server, {
     cors: {
         origin: "*", // Permite que qualquer site (como seu Pato Hub) se conecte
         methods: ["GET", "POST"]
-    }
 });
 
 io.on('connection', (socket) => {
