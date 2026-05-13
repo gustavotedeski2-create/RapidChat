@@ -6,23 +6,50 @@
     <button onclick="logar()">Entrar</button>
 </div>
 
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
 <script>
+    // CONEXÃO COM A RENDER (Use exatamente o link que apareceu no seu log verde)
+    const socket = io('https://rapidchat-p9g4.onrender.com');
+
+    // Função do botão Criar Conta
     function cadastrar() {
         const user = document.getElementById('username').value;
         const pass = document.getElementById('password').value;
-        // Envia para o servidor na Render salvar no banco
-        socket.emit('novo usuario', { user, pass });
+        
+        if(!user || !pass) return alert("Preencha todos os campos!");
+        
+        // Envia para o servidor
+        socket.emit('novo usuario', { user: user, pass: pass });
     }
 
+    // Função do botão Entrar
     function logar() {
         const user = document.getElementById('username').value;
         const pass = document.getElementById('password').value;
-        socket.emit('tentar login', { user, pass });
+        
+        if(!user || !pass) return alert("Preencha todos os campos!");
+        
+        // Envia para o servidor
+        socket.emit('tentar login', { user: user, pass: pass });
     }
 
-    // Se o login der certo, a gente esconde a tela de login e mostra o chat
+    // RESPOSTAS DO SERVIDOR:
+    socket.on('cadastro sucesso', () => {
+        alert('Conta criada com sucesso! Agora é só clicar em Entrar.');
+    });
+
     socket.on('login sucesso', () => {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('chat-container').style.display = 'block';
+        // Guarda o usuário logado para usar no chat
+        const user = document.getElementById('username').value;
+        localStorage.setItem('pato_usuario', user);
+        
+        alert('Logado com sucesso!');
+        // Pula para a página do chat
+        window.location.href = "index.html"; 
+    });
+
+    socket.on('erro', (msg) => {
+        alert(msg); // Vai mostrar se o usuário já existe ou se a senha está errada
     });
 </script>
