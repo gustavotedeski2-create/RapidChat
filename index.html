@@ -14,7 +14,764 @@
         body {
             font-family: 'Courier New', monospace;
             background: #0a0e27;
+            color: #00ff88;<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PatoChat - Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0e27;
             color: #00ff88;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 300px;
+            background: #1a1f3a;
+            border-right: 2px solid #00ff88;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            border-bottom: 2px solid #00ff88;
+            background: #0a0e27;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .sidebar-header .user-info {
+            font-size: 12px;
+            color: #00aa55;
+            margin-top: 5px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #00ff88;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #1a1f3a;
+            color: #00ff88;
+            border: none;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #0a0e27;
+            border-bottom-color: #00ff88;
+        }
+
+        .chats-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .chat-item {
+            padding: 12px;
+            margin: 3px 0;
+            background: #252d4a;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            word-break: break-word;
+            border-radius: 3px;
+        }
+
+        .chat-item:hover {
+            background: #2d3d5c;
+            border-left-color: #00ff88;
+        }
+
+        .chat-item.active {
+            background: #1a3a2a;
+            border-left-color: #00ff88;
+            color: #00ff88;
+        }
+
+        .chat-item .nome {
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .chat-item .preview {
+            font-size: 11px;
+            color: #00aa55;
+            margin-top: 2px;
+        }
+
+        .sidebar-footer {
+            padding: 10px;
+            border-top: 1px solid #00ff88;
+            background: #0a0e27;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .novo-chat-btn, .btn-sair {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .novo-chat-btn {
+            background: #00ff88;
+            color: #0a0e27;
+        }
+
+        .novo-chat-btn:hover {
+            background: #00cc6a;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .btn-sair {
+            background: #8b0000;
+            color: #fff;
+        }
+
+        .btn-sair:hover {
+            background: #b00000;
+        }
+
+        /* MAIN CHAT */
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0a0e27;
+        }
+
+        .chat-header {
+            padding: 15px;
+            background: #1a1f3a;
+            border-bottom: 2px solid #00ff88;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h2 {
+            font-size: 16px;
+            color: #00ff88;
+        }
+
+        .chat-header .info {
+            font-size: 12px;
+            color: #00aa55;
+        }
+
+        .mensagens {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .mensagem {
+            padding: 8px 12px;
+            border-radius: 5px;
+            max-width: 70%;
+            word-wrap: break-word;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mensagem .usuario {
+            font-weight: bold;
+            font-size: 11px;
+            margin-bottom: 2px;
+            color: #00ff88;
+        }
+
+        .mensagem.minha {
+            align-self: flex-end;
+            background: #004d00;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+        }
+
+        .mensagem.outra {
+            align-self: flex-start;
+            background: #1a3a2a;
+            color: #00ff88;
+            border: 1px solid #00aa55;
+        }
+
+        .mensagem img {
+            max-width: 300px;
+            border-radius: 3px;
+            margin-top: 5px;
+        }
+
+        .mensagem .hora {
+            font-size: 10px;
+            color: #00aa55;
+            margin-top: 3px;
+        }
+
+        /* INPUT AREA */
+        .input-area {
+            padding: 15px;
+            border-top: 2px solid #00ff88;
+            background: #1a1f3a;
+            display: flex;
+            gap: 8px;
+        }
+
+        input[type="text"].msg-input {
+            flex: 1;
+            padding: 10px;
+            background: #0a0e27;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        input[type="text"].msg-input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        input[type="text"].msg-input::placeholder {
+            color: #00aa55;
+        }
+
+        .btn-enviar, .btn-imagem {
+            padding: 10px 15px;
+            background: #00ff88;
+            color: #0a0e27;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-enviar:hover, .btn-imagem:hover {
+            background: #00cc6a;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.ativo {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1f3a;
+            padding: 20px;
+            border-radius: 5px;
+            border: 2px solid #00ff88;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-content h3 {
+            color: #00ff88;
+            margin-bottom: 15px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background: #0a0e27;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-criar {
+            background: #00ff88;
+            color: #0a0e27;
+        }
+
+        .btn-criar:hover {
+            background: #00cc6a;
+        }
+
+        .btn-cancelar {
+            background: #444;
+            color: #fff;
+        }
+
+        .btn-cancelar:hover {
+            background: #555;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1f3a;
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 2001;
+            display: none;
+            max-width: 90%;
+        }
+
+        .notification.ativo {
+            display: block;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1f3a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00ff88;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 150px;
+            }
+
+            .container {
+                flex-direction: column;
+            }
+
+            .mensagem {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                🦆 PatoChat
+                <div class="user-info" id="userInfo">Carregando...</div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="trocarAba('global')">Global</button>
+                <button class="tab-btn" onclick="trocarAba('privados')">Privados</button>
+            </div>
+
+            <div class="chats-list" id="chatsList"></div>
+
+            <div class="sidebar-footer">
+                <button class="novo-chat-btn" onclick="abrirModalNovoChat()">+ Novo Chat</button>
+                <button class="btn-sair" onclick="sair()">Sair</button>
+            </div>
+        </div>
+
+        <!-- MAIN CHAT -->
+        <div class="main-chat">
+            <div class="chat-header">
+                <div>
+                    <h2 id="chatTitulo">🌍 Chat Global</h2>
+                    <div class="info" id="chatInfo">Conectando...</div>
+                </div>
+                <button id="btnChamar" onclick="iniciarChamada()" style="display: none; background: #ff9800; padding: 8px 15px; cursor: pointer; border: none; color: white; border-radius: 3px; font-family: Courier New;">☎️ Chamar</button>
+            </div>
+            <div class="mensagens" id="mensagens"></div>
+            <div class="input-area">
+                <input type="text" class="msg-input" id="textoMensagem" placeholder="Sua mensagem..." onkeypress="verificarEnter(event)">
+                <button class="btn-imagem" onclick="document.getElementById('fileInput').click()">🖼️</button>
+                <button class="btn-enviar" onclick="enviarMensagem()">📤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NOVO CHAT -->
+    <div class="modal" id="modalNovoChat">
+        <div class="modal-content">
+            <h3>💬 Novo Chat Privado</h3>
+            <input type="text" id="inputUsuarioPrivado" placeholder="Nome do usuário...">
+            <div class="modal-buttons">
+                <button class="btn-criar" onclick="criarChatPrivado()">Criar</button>
+                <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION -->
+    <div class="notification" id="notification"></div>
+
+    <!-- FILE INPUT -->
+    <input type="file" id="fileInput" accept="image/*" onchange="enviarImagem()">
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        // ===== VERIFICAR AUTENTICAÇÃO =====
+        let token = localStorage.getItem('patochat_token');
+        let usuarioAtual = localStorage.getItem('patochat_usuario');
+
+        // Se não tem token, volta pro login
+        if (!token || !usuarioAtual) {
+            window.location.href = 'login.html';
+        }
+
+        // ===== CONFIGURAÇÃO =====
+        const SERVER_URL = 'https://rapidchat-p9g4.onrender.com';
+        const socket = io(SERVER_URL);
+
+        let abaAtual = 'global';
+        let chatAtual = 'global';
+        let mensagensCache = { global: [], privados: {} };
+
+        // INICIALIZAR
+        document.getElementById('userInfo').textContent = `👤 ${usuarioAtual}`;
+        socket.emit('autenticar', { token });
+        atualizarListaChats();
+
+        // ===== SOCKET EVENTS =====
+
+        socket.on('carregarHistorico', (dados) => {
+            if (dados.tipo === 'global') {
+                mensagensCache.global = dados.mensagens;
+                mostrarChat('global');
+            }
+        });
+
+        socket.on('chat_message', (dados) => {
+            mensagensCache.global.push(dados);
+            if (chatAtual === 'global') {
+                adicionarMensagemAoChat(dados);
+            }
+        });
+
+        socket.on('private_message', (dados) => {
+            const outro = dados.de === usuarioAtual ? dados.para : dados.de;
+            const chaveChat = [usuarioAtual, outro].sort().join('_');
+            
+            if (!mensagensCache.privados[chaveChat]) {
+                mensagensCache.privados[chaveChat] = [];
+            }
+            mensagensCache.privados[chaveChat].push(dados);
+
+            if (chatAtual === chaveChat) {
+                adicionarMensagemAoChat(dados);
+            }
+
+            atualizarListaChats();
+        });
+
+        socket.on('enviar_imagem', (dados) => {
+            if (dados.para === 'global' && chatAtual === 'global') {
+                adicionarMensagemAoChat(dados);
+            } else if (dados.para === chatAtual) {
+                adicionarMensagemAoChat(dados);
+            }
+
+            if (dados.para !== 'global') {
+                const outro = dados.de === usuarioAtual ? dados.para : dados.de;
+                const chaveChat = [usuarioAtual, outro].sort().join('_');
+                if (!mensagensCache.privados[chaveChat]) {
+                    mensagensCache.privados[chaveChat] = [];
+                }
+                mensagensCache.privados[chaveChat].push(dados);
+                atualizarListaChats();
+            }
+        });
+
+        socket.on('usuario_online', (dados) => {
+            console.log(`✓ ${dados.usuario} online`);
+        });
+
+        socket.on('usuario_offline', (dados) => {
+            console.log(`✗ ${dados.usuario} offline`);
+        });
+
+        // ===== FUNÇÕES CHAT =====
+
+        function enviarMensagem() {
+            const input = document.getElementById('textoMensagem');
+            const texto = input.value.trim();
+
+            if (!texto) return;
+
+            if (chatAtual === 'global') {
+                socket.emit('chat_message', { msg: texto });
+            } else {
+                const usuario = chatAtual.replace(usuarioAtual + '_', '').replace('_' + usuarioAtual, '');
+                socket.emit('private_message', { para: usuario, msg: texto });
+            }
+
+            input.value = '';
+            input.focus();
+        }
+
+        function adicionarMensagemAoChat(dados) {
+            const container = document.getElementById('mensagens');
+            const div = document.createElement('div');
+            div.className = 'mensagem';
+
+            if (dados.de === usuarioAtual || dados.user === usuarioAtual) {
+                div.classList.add('minha');
+            } else {
+                div.classList.add('outra');
+            }
+
+            const usuario = dados.user || dados.de;
+            const hora = dados.timestamp || new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            let conteudo = `<span class="usuario">${usuario}</span>`;
+
+            if (dados.tipo === 'imagem') {
+                conteudo += `<img src="${dados.imagemUrl}" alt="Imagem">`;
+            } else {
+                conteudo += `<span>${dados.msg}</span>`;
+            }
+
+            conteudo += `<span class="hora">${hora}</span>`;
+            div.innerHTML = conteudo;
+
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function trocarAba(aba) {
+            abaAtual = aba;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (aba === 'global') {
+                chatAtual = 'global';
+                document.getElementById('btnChamar').style.display = 'none';
+            }
+
+            atualizarListaChats();
+            mostrarChat(aba === 'global' ? 'global' : Object.keys(mensagensCache.privados)[0] || 'global');
+        }
+
+        function atualizarListaChats() {
+            const lista = document.getElementById('chatsList');
+            lista.innerHTML = '';
+
+            if (abaAtual === 'global') {
+                const item = document.createElement('div');
+                item.className = 'chat-item active';
+                item.innerHTML = '🌍 <strong>Chat Global</strong><div class="preview">Todos podem ver</div>';
+                item.onclick = () => mostrarChat('global');
+                lista.appendChild(item);
+            } else {
+                if (Object.keys(mensagensCache.privados).length === 0) {
+                    lista.innerHTML = '<div style="padding: 20px; color: #00aa55; text-align: center;">Nenhum chat privado</div>';
+                    return;
+                }
+
+                Object.keys(mensagensCache.privados).forEach(chaveChat => {
+                    const usuario = chaveChat.replace(usuarioAtual + '_', '').replace('_' + usuarioAtual, '');
+                    const item = document.createElement('div');
+                    item.className = 'chat-item' + (chatAtual === chaveChat ? ' active' : '');
+                    
+                    const ultimaMensagem = mensagensCache.privados[chaveChat].slice(-1)[0];
+                    const preview = ultimaMensagem ? (ultimaMensagem.tipo === 'imagem' ? '[Imagem]' : ultimaMensagem.msg.substring(0, 30)) : '';
+
+                    item.innerHTML = `<div class="nome">💬 ${usuario}</div><div class="preview">${preview}${preview.length === 30 ? '...' : ''}</div>`;
+                    item.onclick = () => mostrarChat(chaveChat);
+                    lista.appendChild(item);
+                });
+            }
+        }
+
+        function mostrarChat(chaveChat) {
+            chatAtual = chaveChat;
+            atualizarListaChats();
+
+            const container = document.getElementById('mensagens');
+            container.innerHTML = '';
+
+            const titulo = document.getElementById('chatTitulo');
+            if (chaveChat === 'global') {
+                titulo.textContent = '🌍 Chat Global';
+                document.getElementById('btnChamar').style.display = 'none';
+                mensagensCache.global.forEach(msg => adicionarMensagemAoChat(msg));
+            } else {
+                const usuario = chaveChat.replace(usuarioAtual + '_', '').replace('_' + usuarioAtual, '');
+                titulo.textContent = `💬 ${usuario}`;
+                document.getElementById('btnChamar').style.display = 'block';
+                document.getElementById('btnChamar').onclick = () => iniciarChamada(usuario);
+                if (mensagensCache.privados[chaveChat]) {
+                    mensagensCache.privados[chaveChat].forEach(msg => adicionarMensagemAoChat(msg));
+                }
+            }
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function abrirModalNovoChat() {
+            document.getElementById('modalNovoChat').classList.add('ativo');
+            document.getElementById('inputUsuarioPrivado').focus();
+        }
+
+        function fecharModal() {
+            document.getElementById('modalNovoChat').classList.remove('ativo');
+            document.getElementById('inputUsuarioPrivado').value = '';
+        }
+
+        function criarChatPrivado() {
+            const usuario = document.getElementById('inputUsuarioPrivado').value.trim();
+            if (!usuario) {
+                mostrarNotificacao('❌ Digite um nome');
+                return;
+            }
+
+            if (usuario === usuarioAtual) {
+                mostrarNotificacao('❌ Você não pode conversar com você mesmo!');
+                return;
+            }
+
+            const chaveChat = [usuarioAtual, usuario].sort().join('_');
+            if (!mensagensCache.privados[chaveChat]) {
+                mensagensCache.privados[chaveChat] = [];
+            }
+
+            fecharModal();
+            document.querySelectorAll('.tab-btn')[1].click();
+            mostrarChat(chaveChat);
+        }
+
+        function enviarImagem() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('imagem', file);
+
+            mostrarNotificacao('📤 Enviando imagem...');
+
+            fetch(`${SERVER_URL}/api/upload`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.imagemUrl) {
+                    if (chatAtual === 'global') {
+                        socket.emit('enviar_imagem', { para: 'global', imagemUrl: data.imagemUrl });
+                    } else {
+                        const usuario = chatAtual.replace(usuarioAtual + '_', '').replace('_' + usuarioAtual, '');
+                        socket.emit('enviar_imagem', { para: usuario, imagemUrl: data.imagemUrl });
+                    }
+                    document.getElementById('fileInput').value = '';
+                    mostrarNotificacao('✓ Imagem enviada');
+                }
+            })
+            .catch(err => mostrarNotificacao('❌ Erro ao enviar imagem'));
+        }
+
+        function iniciarChamada(usuario) {
+            mostrarNotificacao(`📞 Chamar ${usuario}...`);
+            // Implementar WebRTC aqui
+        }
+
+        function verificarEnter(event) {
+            if (event.key === 'Enter') {
+                enviarMensagem();
+            }
+        }
+
+        function sair() {
+            localStorage.removeItem('patochat_token');
+            localStorage.removeItem('patochat_usuario');
+            window.location.href = 'login.html';
+        }
+
+        function mostrarNotificacao(msg) {
+            const notif = document.getElementById('notification');
+            notif.textContent = msg;
+            notif.classList.add('ativo');
+            setTimeout(() => notif.classList.remove('ativo'), 3000);
+        }
+
+        document.getElementById('modalNovoChat').onclick = function(e) {
+            if (e.target === this) fecharModal();
+        };
+    </script>
+</body>
+</html>
             height: 100vh;
             overflow: hidden;
         }
