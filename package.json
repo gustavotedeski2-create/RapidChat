@@ -1,12 +1,24 @@
 {
-  "name": "pato-chat-server",
+  "name": "patochat-server",
   "version": "1.0.0",
+  "description": "PatoChat - WhatsApp funcional com chat global e privado",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
+  "keywords": ["chat", "socket.io", "whatsapp", "realtime"],
+  "author": "Patinho",
+  "license": "MIT",
   "dependencies": {
+    "express": "^4.18.2",
     "socket.io": "^4.7.2",
-    "pg": "^8.11.0"
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
