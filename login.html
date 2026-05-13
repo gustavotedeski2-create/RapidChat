@@ -1,55 +1,69 @@
-<div id="login-screen" style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
-    <h2>Entrar no PatoChat</h2>
-    <input type="text" id="username" placeholder="Nome de usuário"><br><br>
-    <input type="password" id="password" placeholder="Senha"><br><br>
-    <button onclick="cadastrar()">Criar Conta</button>
-    <button onclick="logar()">Entrar</button>
-</div>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PatoChat - Login</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #222; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-box { background: #333; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        input { width: 80%; padding: 10px; margin: 10px 0; border: none; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-entrar { background: #4CAF50; color: white; }
+        .btn-criar { background: #008CBA; color: white; }
+    </style>
+</head>
+<body>
 
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <div class="login-box">
+        <h2>Entrar no PatoChat 🦆</h2>
+        <input type="text" id="username" placeholder="Nome de usuário">
+        <input type="password" id="password" placeholder="Senha">
+        <br>
+        <button class="btn-criar" onclick="cadastrar()">Criar Conta</button>
+        <button class="btn-entrar" onclick="logar()">Entrar</button>
+    </div>
 
-<script>
-    // CONEXÃO COM A RENDER (Use exatamente o link que apareceu no seu log verde)
-    const socket = io('https://rapidchat-p9g4.onrender.com');
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        // Conexão direta com o seu servidor da Render
+        const socket = io('https://rapidchat-p9g4.onrender.com');
 
-    // Função do botão Criar Conta
-    function cadastrar() {
-        const user = document.getElementById('username').value;
-        const pass = document.getElementById('password').value;
-        
-        if(!user || !pass) return alert("Preencha todos os campos!");
-        
-        // Envia para o servidor
-        socket.emit('novo usuario', { user: user, pass: pass });
-    }
+        function cadastrar() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            if (!user || !pass) return alert('Preencha os campos!');
+            
+            // Envia o evento 'novo usuario' para o server.js
+            socket.emit('novo usuario', { user, pass });
+        }
 
-    // Função do botão Entrar
-    function logar() {
-        const user = document.getElementById('username').value;
-        const pass = document.getElementById('password').value;
-        
-        if(!user || !pass) return alert("Preencha todos os campos!");
-        
-        // Envia para o servidor
-        socket.emit('tentar login', { user: user, pass: pass });
-    }
+        function logar() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            if (!user || !pass) return alert('Preencha os campos!');
+            
+            // Envia o evento 'tentar login' para o server.js
+            socket.emit('tentar login', { user, pass });
+        }
 
-    // RESPOSTAS DO SERVIDOR:
-    socket.on('cadastro sucesso', () => {
-        alert('Conta criada com sucesso! Agora é só clicar em Entrar.');
-    });
+        // Respostas vindas do servidor:
+        socket.on('cadastro sucesso', () => {
+            alert('Conta criada com sucesso! Agora clique em Entrar.');
+        });
 
-    socket.on('login sucesso', () => {
-        // Guarda o usuário logado para usar no chat
-        const user = document.getElementById('username').value;
-        localStorage.setItem('pato_usuario', user);
-        
-        alert('Logado com sucesso!');
-        // Pula para a página do chat
-        window.location.href = "index.html"; 
-    });
+        socket.on('login sucesso', () => {
+            // Guarda o nome do patinho no navegador para o chat saber quem é
+            const user = document.getElementById('username').value;
+            localStorage.setItem('pato_usuario', user);
+            
+            // Pula para a tela do chat
+            window.location.href = "index.html";
+        });
 
-    socket.on('erro', (msg) => {
-        alert(msg); // Vai mostrar se o usuário já existe ou se a senha está errada
-    });
-</script>
+        socket.on('erro', (mensagem) => {
+            alert(mensagem);
+        });
+    </script>
+</body>
+</html>
