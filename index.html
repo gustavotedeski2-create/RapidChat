@@ -1,70 +1,24 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PatoChat - Sala</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #222; color: #fff; margin: 0; padding: 20px; }
-        #chat-container { max-width: 600px; margin: 0 auto; background: #333; padding: 20px; border-radius: 10px; }
-        ul { list-style-type: none; padding: 0; max-height: 400px; overflow-y: auto; background: #111; padding: 10px; border-radius: 5px; }
-        li { padding: 8px; margin-bottom: 5px; background: #444; border-radius: 3px; }
-        input { width: 75%; padding: 10px; border: none; border-radius: 5px; }
-        button { width: 20%; padding: 10px; background: #ff9800; border: none; color: white; font-weight: bold; border-radius: 5px; cursor: pointer; }
-    </style>
-</head>
-<body>
-
-    <div id="chat-container">
-        <h2 id="boas-vindas">PatoChat 💬</h2>
-        <ul id="lista-mensagens"></ul>
-        <input type="text" id="texto-mensagem" placeholder="Digite sua mensagem..." onkeypress="verificarEnter(event)">
-        <button onclick="enviarMensagem()">Enviar</button>
-    </div>
-
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script>
-        const socket = io('https://rapidchat-p9g4.onrender.com');
-        
-        // Pega o usuário que salvamos no login
-        const meuUsuario = localStorage.getItem('pato_usuario');
-
-        // Segurança: Se tentou entrar direto sem logar, chuta de volta
-        if (!meuUsuario) {
-            window.location.href = "login.html";
-        } else {
-            document.getElementById('boas-vindas').textContent = `PatoChat 🦆 (Logado como: ${meuUsuario})`;
-        }
-
-        function enviarMensagem() {
-            const input = document.getElementById('texto-mensagem');
-            const texto = input.value;
-            if (!texto) return;
-
-            // Envia o seu nome junto com o texto para o servidor
-            socket.emit('chat message', { user: meuUsuario, msg: texto });
-            input.value = '';
-        }
-
-        // Escuta o servidor enviar as mensagens de volta
-        socket.on('chat message', (dados) => {
-            const lista = document.getElementById('lista-mensagens');
-            const item = document.createElement('li');
-            
-            // Mostra no formato "Nome: Mensagem"
-            item.textContent = `${dados.user}: ${dados.msg}`;
-            lista.appendChild(item);
-            
-            // Joga o scroll do chat sempre para baixo
-            lista.scrollTop = lista.scrollHeight;
-        });
-
-        // Atalho para enviar com a tecla Enter
-        function verificarEnter(event) {
-            if (event.key === 'Enter') {
-                enviarMensagem();
-            }
-        }
-    </script>
-</body>
-</html>
+{
+  "name": "patochat-server",
+  "version": "1.0.0",
+  "description": "PatoChat - WhatsApp funcional com chat global e privado",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": ["chat", "socket.io", "whatsapp", "realtime"],
+  "author": "Patinho",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
