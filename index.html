@@ -38,39 +38,41 @@
         <button onclick="enviarMensagem()">Enviar</button>
     </footer>
 
-    <!-- Importando o Socket.io (essencial para o online) -->
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script>
-        // AQUI ESTÁ O SEGREDO: Conectar com o link da Render que você vai criar
-        const socket = io('https://rapidchat-p9g4.onrender.com/');
+ <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
-        const container = document.getElementById('chat-container');
-        const input = document.getElementById('msgInput');
+<script>
+    // Conecta na Render também
+    const socket = io('https://rapidchat-p9g4.onrender.com');
 
-        function enviarMensagem() {
-            const texto = input.value;
-            if (texto.trim() !== "") {
-                // Envia para o servidor na Render
-                socket.emit('chat message', texto);
-                
-                // Mostra na sua tela
-                adicionarMensagem(texto, 'sent');
-                input.value = '';
-            }
-        }
+    // Pega o nome de quem logou
+    const meuUsuario = localStorage.getItem('pato_usuario');
 
-        // Quando o servidor mandar uma mensagem de outra pessoa
-        socket.on('chat message', (msg) => {
-            adicionarMensagem(msg, 'received');
-        });
+    // Se o cara tentar burlar e entrar direto no chat sem login, chuta ele de volta
+    if (!meuUsuario) {
+        window.location.href = "login.html";
+    }
 
-        function adicionarMensagem(texto, tipo) {
-            const div = document.createElement('div');
-            div.className = `message ${tipo}`;
-            div.innerText = texto;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight; // Rola para baixo
-        }
-    </script>
+    // Função de enviar mensagem
+    function enviarMensagem() {
+        const input = document.getElementById('texto-mensagem');
+        const texto = input.value;
+        
+        if(!texto) return;
+
+        // Envia o seu nome junto com o texto da mensagem
+        socket.emit('chat message', { user: meuUsuario, msg: texto });
+        input.value = '';
+    }
+
+    // Escuta as mensagens que o servidor espalha
+    socket.on('chat message', (dados) => {
+        const lista = document.getElementById('lista-mensagens');
+        const item = document.createElement('li');
+        
+        // Formata para aparecer "Nome: Mensagem"
+        item.textContent = `${dados.user}: ${dados.msg}`;
+        lista.appendChild(item);
+    });
+</script>
 </body>
 </html>
