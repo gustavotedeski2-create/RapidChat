@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PatoChat - Login</title>
+    <title>PatoChat - Chat</title>
     <style>
         * {
             margin: 0;
@@ -13,184 +13,18 @@
 
         body {
             font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
-            color: #00ff88;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .login-container {
             background: #0a0e27;
-            border: 2px solid #00ff88;
-            padding: 40px;
-            border-radius: 5px;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-        }
-
-        .logo {
-            text-align: center;
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            text-align: center;
             color: #00ff88;
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #00aa55;
-            margin-bottom: 30px;
-            font-size: 12px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #00ff88;
-            font-weight: bold;
-            font-size: 13px;
-        }
-
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            background: #1a1f3a;
-            border: 1px solid #00ff88;
-            color: #00ff88;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            transition: all 0.3s;
-        }
-
-        input[type="text"]:focus, input[type="password"]:focus {
-            outline: none;
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
-            background: #0a0e27;
-        }
-
-        input::placeholder {
-            color: #00aa55;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        button {
-            flex: 1;
-            padding: 12px;
-            background: #00ff88;
-            color: #0a0e27;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        button:hover {
-            background: #00cc6a;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
-            transform: translate(0, -2px);
-        }
-
-        .btn-registrar {
-            background: #004d00;
-            color: #00ff88;
-            border: 1px solid #00ff88;
-        }
-
-        .btn-registrar:hover {
-            background: #006600;
-            border-color: #00cc6a;
-        }
-
-        .error-message {
-            background: #3a1a1a;
-            border: 1px solid #ff4444;
-            color: #ff8888;
-            padding: 12px;
-            border-radius: 3px;
-            font-size: 12px;
-            text-align: center;
-            margin-bottom: 15px;
-            display: none;
-        }
-
-        .error-message.ativo {
-            display: block;
-        }
-
-        .status {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 12px;
-            color: #00aa55;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            color: #00aa55;
-            font-size: 12px;
-        }
-
-        .spinner {
-            display: inline-block;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .versao {
-            text-align: center;
-            color: #00aa55;
-            font-size: 10px;
-            margin-top: 20px;
-        }
-
-        .modal-chat {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0e27;
-            z-index: 1000;
-        }
-
-        .modal-chat.ativo {
-            display: flex;
-            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .container {
             display: flex;
-            flex: 1;
-            overflow: hidden;
+            height: 100vh;
         }
 
+        /* SIDEBAR */
         .sidebar {
             width: 300px;
             background: #1a1f3a;
@@ -317,6 +151,7 @@
             background: #b00000;
         }
 
+        /* MAIN CHAT */
         .main-chat {
             flex: 1;
             display: flex;
@@ -395,6 +230,7 @@
             margin-top: 3px;
         }
 
+        /* INPUT AREA */
         .input-area {
             padding: 15px;
             border-top: 2px solid #00ff88;
@@ -494,6 +330,22 @@
 
         .modal-buttons button {
             flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-criar {
+            background: #00ff88;
+            color: #0a0e27;
+        }
+
+        .btn-criar:hover {
+            background: #00cc6a;
         }
 
         .btn-cancelar {
@@ -503,86 +355,6 @@
 
         .btn-cancelar:hover {
             background: #555;
-        }
-
-        .call-modal {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #1a1f3a;
-            border: 2px solid #00ff88;
-            border-radius: 10px;
-            padding: 20px;
-            z-index: 2000;
-            min-width: 300px;
-            max-width: 500px;
-            display: none;
-        }
-
-        .call-modal.ativo {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .call-modal video {
-            width: 100%;
-            border-radius: 5px;
-            background: #000;
-            margin-bottom: 10px;
-        }
-
-        .call-modal .video-remote {
-            width: 100%;
-            height: 300px;
-            background: #000;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-
-        .call-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .btn-call {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-            transition: all 0.3s;
-        }
-
-        .btn-call-green {
-            background: #00ff88;
-            color: #0a0e27;
-        }
-
-        .btn-call-green:hover {
-            background: #00cc6a;
-        }
-
-        .btn-call-red {
-            background: #ff4444;
-            color: #fff;
-        }
-
-        .btn-call-red:hover {
-            background: #cc0000;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #1a1f3a;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #00ff88;
-            border-radius: 4px;
         }
 
         .notification {
@@ -604,6 +376,19 @@
             display: block;
         }
 
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1f3a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00ff88;
+            border-radius: 4px;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
@@ -611,16 +396,8 @@
                 max-height: 150px;
             }
 
-            .main-chat {
-                display: none;
-            }
-
             .container {
                 flex-direction: column;
-            }
-
-            .chat-item .preview {
-                display: none;
             }
 
             .mensagem {
@@ -630,98 +407,43 @@
     </style>
 </head>
 <body>
-    <!-- LOGIN -->
-    <div class="login-container" id="loginContainer">
-        <div class="logo">🦆</div>
-        <h1>PatoChat</h1>
-        <p class="subtitle">Seu WhatsApp pessoal com segurança</p>
-
-        <div class="error-message" id="errorMsg"></div>
-        <div class="loading" id="loading"><span class="spinner">⟳</span> Processando...</div>
-
-        <div class="form-group">
-            <label for="loginUsername">👤 Usuário:</label>
-            <input type="text" id="loginUsername" placeholder="Seu username..." minlength="3" maxlength="20">
-        </div>
-
-        <div class="form-group">
-            <label for="loginPassword">🔐 Senha:</label>
-            <input type="password" id="loginPassword" placeholder="Sua senha..." minlength="6">
-        </div>
-
-        <div class="btn-group">
-            <button onclick="fazerLogin()">🚀 Entrar</button>
-            <button class="btn-registrar" onclick="mostrarRegistro()">📝 Registrar</button>
-        </div>
-
-        <div id="registerForm" style="display: none;">
-            <div class="form-group">
-                <label for="regUsername">👤 Novo Usuário:</label>
-                <input type="text" id="regUsername" placeholder="Escolha um username..." minlength="3" maxlength="20">
+    <div class="container">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                🦆 PatoChat
+                <div class="user-info" id="userInfo">Carregando...</div>
             </div>
 
-            <div class="form-group">
-                <label for="regPassword">🔐 Nova Senha:</label>
-                <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres..." minlength="6">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="trocarAba('global')">Global</button>
+                <button class="tab-btn" onclick="trocarAba('privados')">Privados</button>
             </div>
 
-            <div class="form-group">
-                <label for="regPassword2">🔐 Confirmar:</label>
-                <input type="password" id="regPassword2" placeholder="Confirme a senha..." minlength="6">
-            </div>
+            <div class="chats-list" id="chatsList"></div>
 
-            <div class="btn-group">
-                <button onclick="fazerRegistro()">✓ Registrar</button>
-                <button class="btn-registrar" onclick="voltarLogin()">✕ Cancelar</button>
+            <div class="sidebar-footer">
+                <button class="novo-chat-btn" onclick="abrirModalNovoChat()">+ Novo Chat</button>
+                <button class="btn-sair" onclick="sair()">Sair</button>
             </div>
         </div>
 
-        <div class="status" id="status"></div>
-        <div class="versao">v2.0.0 • PatoChat Seguro</div>
-    </div>
-
-    <!-- CHAT -->
-    <div class="modal-chat" id="chatModal">
-        <div class="container">
-            <!-- SIDEBAR -->
-            <div class="sidebar">
-                <div class="sidebar-header">
-                    🦆 PatoChat
-                    <div class="user-info" id="userInfo">Carregando...</div>
+        <!-- MAIN CHAT -->
+        <div class="main-chat">
+            <div class="chat-header">
+                <div>
+                    <h2 id="chatTitulo">🌍 Chat Global</h2>
+                    <div class="info" id="chatInfo">Conectando...</div>
                 </div>
-
-                <div class="tabs">
-                    <button class="tab-btn active" onclick="trocarAba('global')">Global</button>
-                    <button class="tab-btn" onclick="trocarAba('privados')">Privados</button>
-                </div>
-
-                <div class="chats-list" id="chatsList"></div>
-
-                <div class="sidebar-footer">
-                    <button class="novo-chat-btn" onclick="abrirModalNovoChat()">+ Novo Chat</button>
-                    <button class="btn-sair" onclick="sair()">Sair</button>
-                </div>
+                <button id="btnChamar" onclick="iniciarChamada()" style="display: none; background: #ff9800; padding: 8px 15px; cursor: pointer; border: none; color: white; border-radius: 3px; font-family: Courier New;">☎️ Chamar</button>
             </div>
-
-            <!-- MAIN CHAT -->
-            <div class="main-chat">
-                <div class="chat-header">
-                    <div>
-                        <h2 id="chatTitulo">🌍 Chat Global</h2>
-                        <div class="info" id="chatInfo">Conectando...</div>
-                    </div>
-                    <button id="btnChamar" onclick="iniciarChamada()" style="display: none; background: #ff9800; padding: 8px 15px; cursor: pointer; border: none; color: white; border-radius: 3px; font-family: Courier New;">☎️ Chamar</button>
-                </div>
-                <div class="mensagens" id="mensagens"></div>
-                <div class="input-area">
-                    <input type="text" class="msg-input" id="textoMensagem" placeholder="Sua mensagem..." onkeypress="verificarEnter(event)">
-                    <button class="btn-imagem" onclick="document.getElementById('fileInput').click()">🖼️</button>
-                    <button class="btn-enviar" onclick="enviarMensagem()">📤</button>
-                </div>
+            <div class="mensagens" id="mensagens"></div>
+            <div class="input-area">
+                <input type="text" class="msg-input" id="textoMensagem" placeholder="Sua mensagem..." onkeypress="verificarEnter(event)">
+                <button class="btn-imagem" onclick="document.getElementById('fileInput').click()">🖼️</button>
+                <button class="btn-enviar" onclick="enviarMensagem()">📤</button>
             </div>
         </div>
-
-        <input type="file" id="fileInput" accept="image/*" onchange="enviarImagem()">
     </div>
 
     <!-- MODAL NOVO CHAT -->
@@ -730,7 +452,7 @@
             <h3>💬 Novo Chat Privado</h3>
             <input type="text" id="inputUsuarioPrivado" placeholder="Nome do usuário...">
             <div class="modal-buttons">
-                <button onclick="criarChatPrivado()" style="background: #00ff88; color: #0a0e27;">Criar</button>
+                <button class="btn-criar" onclick="criarChatPrivado()">Criar</button>
                 <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
             </div>
         </div>
@@ -739,151 +461,41 @@
     <!-- NOTIFICATION -->
     <div class="notification" id="notification"></div>
 
-    <!-- VIDEOCHAMADA -->
-    <div class="call-modal" id="callModal">
-        <h3 id="callTitle">📞 Chamada</h3>
-        <video id="localVideo" autoplay muted playsinline></video>
-        <div class="video-remote" id="remoteVideo"></div>
-        <div class="call-buttons">
-            <button class="btn-call btn-call-red" onclick="finalizarChamada()">📞</button>
-            <button class="btn-call btn-call-green" id="micBtn" onclick="toggleMic()">🎤</button>
-            <button class="btn-call btn-call-green" id="cameraBtn" onclick="toggleCamera()">📷</button>
-        </div>
-    </div>
+    <!-- FILE INPUT -->
+    <input type="file" id="fileInput" accept="image/*" onchange="enviarImagem()">
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
-        // ===== CONFIGURAÇÃO =====
-        const SERVER_URL = 'https://patochat-server.onrender.com'; // Mude para sua URL do Render
-        const socket = io(SERVER_URL);
-
+        // ===== VERIFICAR AUTENTICAÇÃO =====
         let token = localStorage.getItem('patochat_token');
         let usuarioAtual = localStorage.getItem('patochat_usuario');
+
+        // Se não tem token, volta pro login
+        if (!token || !usuarioAtual) {
+            window.location.href = 'login.html';
+        }
+
+        // ===== CONFIGURAÇÃO =====
+        const SERVER_URL = 'https://patochat-server.onrender.com'; // MUDE PARA SUA URL
+        const socket = io(SERVER_URL);
+
         let abaAtual = 'global';
         let chatAtual = 'global';
         let mensagensCache = { global: [], privados: {} };
 
-        // WebRTC
-        let peerConnection;
-        let localStream;
-        let chamadaAtiva = null;
-        let usuarioChamada = null;
-
-        // ===== AUTENTICAÇÃO =====
-
-        function mostrarLogin() {
-            document.getElementById('loginContainer').style.display = 'block';
-            document.getElementById('chatModal').classList.remove('ativo');
-        }
-
-        function mostrarRegistro() {
-            document.getElementById('registerForm').style.display = 'block';
-            document.querySelector('input[type="text"]:first-of-type').parentElement.parentElement.style.display = 'none';
-            document.querySelector('input[type="password"]:first-of-type').parentElement.parentElement.style.display = 'none';
-        }
-
-        function voltarLogin() {
-            document.getElementById('registerForm').style.display = 'none';
-            document.querySelector('input[type="text"]:first-of-type').parentElement.parentElement.style.display = 'block';
-            document.querySelector('input[type="password"]:first-of-type').parentElement.parentElement.style.display = 'block';
-        }
-
-        function fazerLogin() {
-            const username = document.getElementById('loginUsername').value.trim();
-            const senha = document.getElementById('loginPassword').value;
-
-            if (!username || !senha) {
-                mostrarErro('Preencha todos os campos');
-                return;
-            }
-
-            mostrarLoading();
-
-            fetch(`${SERVER_URL}/api/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, senha })
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.erro) {
-                    mostrarErro(data.erro);
-                    esconderLoading();
-                } else {
-                    localStorage.setItem('patochat_token', data.token);
-                    localStorage.setItem('patochat_usuario', data.username);
-                    entrarNoChat(data.token, data.username);
-                }
-            })
-            .catch(err => {
-                mostrarErro('Erro ao conectar com servidor');
-                console.error(err);
-                esconderLoading();
-            });
-        }
-
-        function fazerRegistro() {
-            const username = document.getElementById('regUsername').value.trim();
-            const senha = document.getElementById('regPassword').value;
-            const senha2 = document.getElementById('regPassword2').value;
-
-            if (!username || !senha || !senha2) {
-                mostrarErro('Preencha todos os campos');
-                return;
-            }
-
-            if (senha !== senha2) {
-                mostrarErro('As senhas não conferem');
-                return;
-            }
-
-            if (senha.length < 6) {
-                mostrarErro('Senha muito curta');
-                return;
-            }
-
-            mostrarLoading();
-
-            fetch(`${SERVER_URL}/api/registrar`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, senha })
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.erro) {
-                    mostrarErro(data.erro);
-                    esconderLoading();
-                } else {
-                    localStorage.setItem('patochat_token', data.token);
-                    localStorage.setItem('patochat_usuario', data.username);
-                    entrarNoChat(data.token, data.username);
-                }
-            })
-            .catch(err => {
-                mostrarErro('Erro ao registrar');
-                console.error(err);
-                esconderLoading();
-            });
-        }
-
-        function entrarNoChat(token, username) {
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('chatModal').classList.add('ativo');
-            document.getElementById('userInfo').textContent = `👤 ${username}`;
-
-            socket.emit('autenticar', { token });
-            socket.on('carregarHistorico', (dados) => {
-                if (dados.tipo === 'global') {
-                    mensagensCache.global = dados.mensagens;
-                    mostrarChat('global');
-                }
-            });
-
-            esconderLoading();
-        }
+        // INICIALIZAR
+        document.getElementById('userInfo').textContent = `👤 ${usuarioAtual}`;
+        socket.emit('autenticar', { token });
+        atualizarListaChats();
 
         // ===== SOCKET EVENTS =====
+
+        socket.on('carregarHistorico', (dados) => {
+            if (dados.tipo === 'global') {
+                mensagensCache.global = dados.mensagens;
+                mostrarChat('global');
+            }
+        });
 
         socket.on('chat_message', (dados) => {
             mensagensCache.global.push(dados);
@@ -934,53 +546,7 @@
             console.log(`✗ ${dados.usuario} offline`);
         });
 
-        socket.on('chamada_recebida', async (dados) => {
-            if (confirm(`${dados.de} está chamando você. Aceitar?`)) {
-                chamadaAtiva = dados.chamadaId;
-                usuarioChamada = dados.de;
-                socket.emit('aceitar_chamada', { chamadaId: dados.chamadaId, de: dados.de });
-                iniciarStreamLocal();
-            } else {
-                socket.emit('recusar_chamada', { chamadaId: dados.chamadaId, de: dados.de });
-            }
-        });
-
-        socket.on('chamada_aceita', async (dados) => {
-            chamadaAtiva = dados.chamadaId;
-            usuarioChamada = dados.para;
-            iniciarStreamLocal();
-            criarOffer();
-        });
-
-        socket.on('webrtc_offer', async (dados) => {
-            if (!peerConnection) {
-                iniciarStreamLocal();
-                criarPeerConnection();
-            }
-
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(dados.offer));
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-            socket.emit('webrtc_answer', { para: dados.de, answer });
-        });
-
-        socket.on('webrtc_answer', async (dados) => {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(dados.answer));
-        });
-
-        socket.on('webrtc_ice', async (dados) => {
-            try {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(dados.candidate));
-            } catch (err) {
-                console.error('Erro ao adicionar ICE candidate:', err);
-            }
-        });
-
-        socket.on('chamada_finalizada', () => {
-            finalizarChamada();
-        });
-
-        // ===== CHAT FUNCTIONS =====
+        // ===== FUNÇÕES CHAT =====
 
         function enviarMensagem() {
             const input = document.getElementById('textoMensagem');
@@ -1111,12 +677,12 @@
         function criarChatPrivado() {
             const usuario = document.getElementById('inputUsuarioPrivado').value.trim();
             if (!usuario) {
-                mostrarErro('Digite um nome');
+                mostrarNotificacao('❌ Digite um nome');
                 return;
             }
 
             if (usuario === usuarioAtual) {
-                mostrarErro('Você não pode conversar com você mesmo!');
+                mostrarNotificacao('❌ Você não pode conversar com você mesmo!');
                 return;
             }
 
@@ -1126,7 +692,7 @@
             }
 
             fecharModal();
-            trocarAba('privados');
+            document.querySelectorAll('.tab-btn')[1].click();
             mostrarChat(chaveChat);
         }
 
@@ -1157,104 +723,13 @@
                     mostrarNotificacao('✓ Imagem enviada');
                 }
             })
-            .catch(err => mostrarErro('Erro ao enviar imagem'));
+            .catch(err => mostrarNotificacao('❌ Erro ao enviar imagem'));
         }
-
-        // ===== WebRTC / VIDEOCHAMADA =====
 
         function iniciarChamada(usuario) {
-            usuarioChamada = usuario || chatAtual.replace(usuarioAtual + '_', '').replace('_' + usuarioAtual, '');
-            socket.emit('iniciar_chamada', { para: usuarioChamada });
-            mostrarNotificacao(`📞 Chamando ${usuarioChamada}...`);
+            mostrarNotificacao(`📞 Chamar ${usuario}...`);
+            // Implementar WebRTC aqui
         }
-
-        function iniciarStreamLocal() {
-            navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-                .then(stream => {
-                    localStream = stream;
-                    document.getElementById('localVideo').srcObject = stream;
-                    document.getElementById('callModal').classList.add('ativo');
-                    
-                    if (!peerConnection) {
-                        criarPeerConnection();
-                        stream.getTracks().forEach(track => {
-                            peerConnection.addTrack(track, stream);
-                        });
-                    }
-                })
-                .catch(err => {
-                    mostrarErro('Erro ao acessar câmera/microfone');
-                    console.error(err);
-                });
-        }
-
-        function criarPeerConnection() {
-            const config = {
-                iceServers: [
-                    { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }
-                ]
-            };
-
-            peerConnection = new RTCPeerConnection(config);
-
-            peerConnection.ontrack = (event) => {
-                const remoteVideo = document.getElementById('remoteVideo');
-                if (remoteVideo.srcObject !== event.streams[0]) {
-                    remoteVideo.srcObject = event.streams[0];
-                }
-            };
-
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    socket.emit('webrtc_ice', { para: usuarioChamada, candidate: event.candidate });
-                }
-            };
-        }
-
-        async function criarOffer() {
-            const offer = await peerConnection.createOffer();
-            await peerConnection.setLocalDescription(offer);
-            socket.emit('webrtc_offer', { para: usuarioChamada, offer });
-        }
-
-        function toggleMic() {
-            localStream.getAudioTracks().forEach(track => {
-                track.enabled = !track.enabled;
-                document.getElementById('micBtn').style.opacity = track.enabled ? '1' : '0.5';
-            });
-        }
-
-        function toggleCamera() {
-            localStream.getVideoTracks().forEach(track => {
-                track.enabled = !track.enabled;
-                document.getElementById('cameraBtn').style.opacity = track.enabled ? '1' : '0.5';
-            });
-        }
-
-        function finalizarChamada() {
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-            }
-
-            document.getElementById('callModal').classList.remove('ativo');
-            document.getElementById('localVideo').srcObject = null;
-            document.getElementById('remoteVideo').srcObject = null;
-
-            if (chamadaAtiva) {
-                socket.emit('finalizar_chamada', { chamadaId: chamadaAtiva, duracao: 0 });
-                chamadaAtiva = null;
-            }
-
-            usuarioChamada = null;
-        }
-
-        // ===== UTILIDADES =====
 
         function verificarEnter(event) {
             if (event.key === 'Enter') {
@@ -1265,15 +740,7 @@
         function sair() {
             localStorage.removeItem('patochat_token');
             localStorage.removeItem('patochat_usuario');
-            finalizarChamada();
-            location.reload();
-        }
-
-        function mostrarErro(msg) {
-            const errorEl = document.getElementById('errorMsg');
-            errorEl.textContent = '✗ ' + msg;
-            errorEl.classList.add('ativo');
-            setTimeout(() => errorEl.classList.remove('ativo'), 4000);
+            window.location.href = 'login.html';
         }
 
         function mostrarNotificacao(msg) {
@@ -1283,25 +750,9 @@
             setTimeout(() => notif.classList.remove('ativo'), 3000);
         }
 
-        function mostrarLoading() {
-            document.getElementById('loading').style.display = 'block';
-        }
-
-        function esconderLoading() {
-            document.getElementById('loading').style.display = 'none';
-        }
-
         document.getElementById('modalNovoChat').onclick = function(e) {
             if (e.target === this) fecharModal();
         };
-
-        // Verificar se já está logado
-        if (token && usuarioAtual) {
-            entrarNoChat(token, usuarioAtual);
-        }
-
-        // Focus no primeiro input
-        document.getElementById('loginUsername').focus();
     </script>
 </body>
 </html>
