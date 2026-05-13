@@ -15,13 +15,13 @@
             font-family: 'Courier New', monospace;
             background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
             color: #00ff88;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        .container {
+        .login-container {
             background: #0a0e27;
             border: 2px solid #00ff88;
             padding: 40px;
@@ -63,7 +63,7 @@
             font-size: 13px;
         }
 
-        input[type="text"] {
+        input[type="text"], input[type="password"] {
             width: 100%;
             padding: 12px;
             background: #1a1f3a;
@@ -75,19 +75,24 @@
             transition: all 0.3s;
         }
 
-        input[type="text"]:focus {
+        input[type="text"]:focus, input[type="password"]:focus {
             outline: none;
-            border-color: #00ff88;
             box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
             background: #0a0e27;
         }
 
-        input[type="text"]::placeholder {
+        input::placeholder {
             color: #00aa55;
         }
 
-        .btn-entrar {
-            width: 100%;
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            flex: 1;
             padding: 12px;
             background: #00ff88;
             color: #0a0e27;
@@ -98,28 +103,23 @@
             font-weight: bold;
             font-size: 14px;
             transition: all 0.3s;
-            margin-bottom: 15px;
         }
 
-        .btn-entrar:hover {
+        button:hover {
             background: #00cc6a;
             box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
             transform: translate(0, -2px);
         }
 
-        .btn-entrar:active {
-            transform: translate(0, 0);
+        .btn-registrar {
+            background: #004d00;
+            color: #00ff88;
+            border: 1px solid #00ff88;
         }
 
-        .info-message {
-            background: #1a3a2a;
-            border: 1px solid #00aa55;
-            color: #00ff88;
-            padding: 12px;
-            border-radius: 3px;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 20px;
+        .btn-registrar:hover {
+            background: #006600;
+            border-color: #00cc6a;
         }
 
         .error-message {
@@ -168,114 +168,192 @@
             font-size: 10px;
             margin-top: 20px;
         }
+
+        #registerForm {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="login-container">
         <div class="logo">🦆</div>
         <h1>PatoChat</h1>
-        <p class="subtitle">Seu WhatsApp pessoal</p>
+        <p class="subtitle">Seu WhatsApp pessoal com segurança</p>
 
-        <div class="error-message" id="error-msg"></div>
-        <div class="loading" id="loading">
-            <span class="spinner">⟳</span> Entrando...
-        </div>
+        <div class="error-message" id="errorMsg"></div>
+        <div class="loading" id="loading"><span class="spinner">⟳</span> Processando...</div>
 
-        <form id="login-form" onsubmit="handleLogin(event)">
+        <!-- FORM LOGIN -->
+        <div id="loginForm">
             <div class="form-group">
-                <label for="username">👤 Nome de Usuário:</label>
-                <input 
-                    type="text" 
-                    id="username" 
-                    placeholder="Digite seu nome..." 
-                    required
-                    autocomplete="off"
-                    minlength="3"
-                    maxlength="20"
-                >
+                <label for="loginUsername">👤 Usuário:</label>
+                <input type="text" id="loginUsername" placeholder="Seu username..." minlength="3" maxlength="20">
             </div>
 
-            <button type="submit" class="btn-entrar">🚀 Entrar no Chat</button>
-        </form>
+            <div class="form-group">
+                <label for="loginPassword">🔐 Senha:</label>
+                <input type="password" id="loginPassword" placeholder="Sua senha..." minlength="6">
+            </div>
 
-        <div class="info-message">
-            💡 Use um nome único para identificar você no chat. Nomes devem ter entre 3 e 20 caracteres.
+            <div class="btn-group">
+                <button onclick="fazerLogin()">🚀 Entrar</button>
+                <button class="btn-registrar" onclick="mostrarRegistro()">📝 Registrar</button>
+            </div>
+        </div>
+
+        <!-- FORM REGISTRO -->
+        <div id="registerForm">
+            <div class="form-group">
+                <label for="regUsername">👤 Novo Usuário:</label>
+                <input type="text" id="regUsername" placeholder="Escolha um username..." minlength="3" maxlength="20">
+            </div>
+
+            <div class="form-group">
+                <label for="regPassword">🔐 Nova Senha:</label>
+                <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres..." minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label for="regPassword2">🔐 Confirmar:</label>
+                <input type="password" id="regPassword2" placeholder="Confirme a senha..." minlength="6">
+            </div>
+
+            <div class="btn-group">
+                <button onclick="fazerRegistro()">✓ Registrar</button>
+                <button class="btn-registrar" onclick="voltarLogin()">✕ Cancelar</button>
+            </div>
         </div>
 
         <div class="status" id="status"></div>
-
-        <div class="versao">v1.0.0 • PatoChat Global</div>
+        <div class="versao">v2.0.0 • PatoChat Seguro</div>
     </div>
 
     <script>
-        // Já está logado? Redireciona direto
-        const usuarioSalvo = localStorage.getItem('pato_usuario');
-        if (usuarioSalvo) {
-            window.location.href = 'whatsapp.html';
+        // Se já está logado, redireciona pro chat
+        const token = localStorage.getItem('patochat_token');
+        if (token) {
+            window.location.href = 'index.html';
         }
 
-        function handleLogin(event) {
-            event.preventDefault();
+        // URL DO SERVIDOR - MUDE AQUI!
+        const SERVER_URL = 'https://patochat-server.onrender.com';
 
-            const username = document.getElementById('username').value.trim();
-            const form = document.getElementById('login-form');
-            const errorMsg = document.getElementById('error-msg');
-            const loading = document.getElementById('loading');
-            const status = document.getElementById('status');
+        function mostrarRegistro() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('regUsername').focus();
+        }
 
-            // Validações
-            if (username.length < 3) {
-                mostrarErro('Nome deve ter no mínimo 3 caracteres');
+        function voltarLogin() {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('loginUsername').focus();
+        }
+
+        function fazerLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const senha = document.getElementById('loginPassword').value;
+
+            if (!username || !senha) {
+                mostrarErro('Preencha todos os campos');
                 return;
             }
 
-            if (username.length > 20) {
-                mostrarErro('Nome não pode ter mais de 20 caracteres');
+            mostrarLoading();
+
+            fetch(`${SERVER_URL}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, senha })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.erro) {
+                    mostrarErro(data.erro);
+                    esconderLoading();
+                } else {
+                    localStorage.setItem('patochat_token', data.token);
+                    localStorage.setItem('patochat_usuario', data.username);
+                    document.getElementById('status').textContent = '✓ Login realizado! Redirecionando...';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 500);
+                }
+            })
+            .catch(err => {
+                mostrarErro('Erro ao conectar com servidor');
+                console.error(err);
+                esconderLoading();
+            });
+        }
+
+        function fazerRegistro() {
+            const username = document.getElementById('regUsername').value.trim();
+            const senha = document.getElementById('regPassword').value;
+            const senha2 = document.getElementById('regPassword2').value;
+
+            if (!username || !senha || !senha2) {
+                mostrarErro('Preencha todos os campos');
                 return;
             }
 
-            // Caracteres especiais
-            if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-                mostrarErro('Use apenas letras, números, underscore e hífen');
+            if (senha !== senha2) {
+                mostrarErro('As senhas não conferem');
                 return;
             }
 
-            // Mostra loading
-            loading.style.display = 'block';
-            form.style.opacity = '0.5';
-            form.style.pointerEvents = 'none';
-            errorMsg.classList.remove('ativo');
-
-            // Simula uma pequena espera (validação do servidor)
-            setTimeout(() => {
-                localStorage.setItem('pato_usuario', username);
-                status.textContent = '✓ Login realizado com sucesso!';
-                
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 500);
-            }, 800);
-        }
-
-        function mostrarErro(mensagem) {
-            const errorMsg = document.getElementById('error-msg');
-            errorMsg.textContent = '✗ ' + mensagem;
-            errorMsg.classList.add('ativo');
-
-            setTimeout(() => {
-                errorMsg.classList.remove('ativo');
-            }, 4000);
-        }
-
-        // Focus no input automaticamente
-        document.getElementById('username').focus();
-
-        // Enter para submeter
-        document.getElementById('username').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                document.getElementById('login-form').dispatchEvent(new Event('submit'));
+            if (senha.length < 6) {
+                mostrarErro('Senha muito curta');
+                return;
             }
-        });
+
+            mostrarLoading();
+
+            fetch(`${SERVER_URL}/api/registrar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, senha })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.erro) {
+                    mostrarErro(data.erro);
+                    esconderLoading();
+                } else {
+                    localStorage.setItem('patochat_token', data.token);
+                    localStorage.setItem('patochat_usuario', data.username);
+                    document.getElementById('status').textContent = '✓ Usuário criado! Entrando...';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 500);
+                }
+            })
+            .catch(err => {
+                mostrarErro('Erro ao registrar');
+                console.error(err);
+                esconderLoading();
+            });
+        }
+
+        function mostrarErro(msg) {
+            const errorEl = document.getElementById('errorMsg');
+            errorEl.textContent = '✗ ' + msg;
+            errorEl.classList.add('ativo');
+            setTimeout(() => errorEl.classList.remove('ativo'), 4000);
+        }
+
+        function mostrarLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function esconderLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Focus no primeiro input
+        document.getElementById('loginUsername').focus();
     </script>
 </body>
 </html>
