@@ -5,7 +5,7 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
+const { Pool } = require('pg');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -57,47 +57,68 @@ const upload = multer({
     }
 });
 
-// Conectar MongoDB
-const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/patochat';
-mongoose.connect(mongoUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
-    console.log('✓ Conectado ao MongoDB');
-}).catch(err => {
-    console.error('✗ Erro ao conectar MongoDB:', err);
+// ===== CONFIGURAÇÃO POSTGRESQL =====
+
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
-// ===== SCHEMAS =====
-
-const usuarioSchema = new mongoose.Schema({
-    username: { type: String, unique: true, required: true, lowercase: true, minlength: 3, maxlength: 20 },
-    senha: { type: String, required: true },
-    criadoEm: { type: Date, default: Date.now },
-    ultimaConexao: { type: Date, default: Date.now }
+pool.on('error', (err) => {
+    console.error('Erro no pool de conexão:', err);
 });
 
-const mensagemSchema = new mongoose.Schema({
-    de: { type: String, required: true },
-    para: { type: String, default: 'global' },
-    msg: String,
-    tipo: { type: String, enum: ['texto', 'imagem'], default: 'texto' },
-    imagemUrl: String,
-    timestamp: { type: Date, default: Date.now }
+pool.on('connect', () => {
+    console.log('✓ Conectado ao PostgreSQL');
 });
 
-const chamadaSchema = new mongoose.Schema({
-    de: { type: String, required: true },
-    para: { type: String, required: true },
-    status: { type: String, enum: ['pendente', 'aceita', 'recusada', 'finalizada'], default: 'pendente' },
-    duracao: Number,
-    criadaEm: { type: Date, default: Date.now },
-    finalizadaEm: Date
-});
+// ===== CRIAR TABELAS =====
 
-const Usuario = mongoose.model('Usuario', usuarioSchema);
-const Mensagem = mongoose.model('Mensagem', mensagemSchema);
-const Chamada = mongoose.model('Chamada', chamadaSchema);
+async function criarTabelas() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(20) UNIQUE NOT NULL,
+                senha VARCHAR(255) NOT NULL,
+                criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ultima_conexao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS mensagens (
+                id SERIAL PRIMARY KEY,
+                de VARCHAR(20) NOT NULL,
+                para VARCHAR(20) DEFAULT 'global',
+                msg TEXT,
+                tipo VARCHAR(20) DEFAULT 'texto',
+                imagem_url VARCHAR(500),
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS chamadas (
+                id SERIAL PRIMARY KEY,
+                de VARCHAR(20) NOT NULL,
+                para VARCHAR(20) NOT NULL,
+                status VARCHAR(20) DEFAULT 'pendente',
+                duracao INTEGER,
+                criada_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                finalizada_em TIMESTAMP
+            )
+        `);
+
+        console.log('✓ Tabelas criadas/verificadas');
+    } catch (erro) {
+        console.error('Erro ao criar tabelas:', erro);
+    }
+}
+
+criarTabelas();
 
 // ===== FUNÇÕES AUXILIARES =====
 
@@ -138,18 +159,23 @@ app.post('/api/registrar', async (req, res) => {
             return res.status(400).json({ erro: 'Senha deve ter no mínimo 6 caracteres' });
         }
 
-        const usuarioExistente = await Usuario.findOne({ username: username.toLowerCase() });
-        if (usuarioExistente) {
+        // Verificar se usuário já existe
+        const usuarioExistente = await pool.query(
+            'SELECT * FROM usuarios WHERE username = $1',
+            [username.toLowerCase()]
+        );
+
+        if (usuarioExistente.rows.length > 0) {
             return res.status(400).json({ erro: 'Usuário já existe' });
         }
 
         const senhaCriptada = await bcrypt.hash(senha, 10);
-        const novoUsuario = new Usuario({
-            username: username.toLowerCase(),
-            senha: senhaCriptada
-        });
+        
+        await pool.query(
+            'INSERT INTO usuarios (username, senha) VALUES ($1, $2)',
+            [username.toLowerCase(), senhaCriptada]
+        );
 
-        await novoUsuario.save();
         const token = gerarToken(username.toLowerCase());
 
         res.status(201).json({ 
@@ -172,18 +198,27 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ erro: 'Username e senha obrigatórios' });
         }
 
-        const usuario = await Usuario.findOne({ username: username.toLowerCase() });
-        if (!usuario) {
+        const resultado = await pool.query(
+            'SELECT * FROM usuarios WHERE username = $1',
+            [username.toLowerCase()]
+        );
+
+        if (resultado.rows.length === 0) {
             return res.status(401).json({ erro: 'Usuário não encontrado' });
         }
 
+        const usuario = resultado.rows[0];
         const senhaValida = await bcrypt.compare(senha, usuario.senha);
+
         if (!senhaValida) {
             return res.status(401).json({ erro: 'Senha incorreta' });
         }
 
-        usuario.ultimaConexao = new Date();
-        await usuario.save();
+        // Atualizar última conexão
+        await pool.query(
+            'UPDATE usuarios SET ultima_conexao = CURRENT_TIMESTAMP WHERE id = $1',
+            [usuario.id]
+        );
 
         const token = gerarToken(username.toLowerCase());
         res.json({ 
@@ -230,22 +265,24 @@ app.get('/api/mensagens/:tipo/:id', async (req, res) => {
         }
 
         const { tipo, id } = req.params;
-        let query = {};
+        let query;
+        let params;
 
         if (tipo === 'global') {
-            query = { para: 'global' };
+            query = 'SELECT * FROM mensagens WHERE para = $1 ORDER BY timestamp ASC LIMIT 100';
+            params = ['global'];
         } else if (tipo === 'privado') {
             const usuarios = [usuario.username, id].sort();
-            query = {
-                $or: [
-                    { de: usuarios[0], para: usuarios[1] },
-                    { de: usuarios[1], para: usuarios[0] }
-                ]
-            };
+            query = `
+                SELECT * FROM mensagens 
+                WHERE (de = $1 AND para = $2) OR (de = $2 AND para = $1)
+                ORDER BY timestamp ASC LIMIT 100
+            `;
+            params = [usuarios[0], usuarios[1]];
         }
 
-        const mensagens = await Mensagem.find(query).sort({ timestamp: 1 }).limit(100);
-        res.json(mensagens);
+        const resultado = await pool.query(query, params);
+        res.json(resultado.rows);
     } catch (erro) {
         console.error(erro);
         res.status(500).json({ erro: 'Erro ao buscar mensagens' });
@@ -272,14 +309,19 @@ io.on('connection', (socket) => {
             console.log(`✓ ${usuarioAtual} autenticado via socket`);
 
             // Pega histórico global e envia
-            const historico = await Mensagem.find({ para: 'global' })
-                .sort({ timestamp: 1 })
-                .limit(50);
-            
-            socket.emit('carregarHistorico', {
-                tipo: 'global',
-                mensagens: historico
-            });
+            try {
+                const resultado = await pool.query(
+                    'SELECT * FROM mensagens WHERE para = $1 ORDER BY timestamp ASC LIMIT 50',
+                    ['global']
+                );
+                
+                socket.emit('carregarHistorico', {
+                    tipo: 'global',
+                    mensagens: resultado.rows
+                });
+            } catch (err) {
+                console.error('Erro ao buscar histórico:', err);
+            }
 
             io.emit('usuario_online', { usuario: usuarioAtual });
         } else {
@@ -292,21 +334,18 @@ io.on('connection', (socket) => {
         if (!usuarioAtual) return;
 
         try {
-            const mensagem = new Mensagem({
-                de: usuarioAtual,
-                para: 'global',
-                msg: dados.msg,
-                tipo: 'texto',
-                timestamp: new Date()
-            });
+            const resultado = await pool.query(
+                'INSERT INTO mensagens (de, para, msg, tipo, timestamp) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP) RETURNING *',
+                [usuarioAtual, 'global', dados.msg, 'texto']
+            );
 
-            await mensagem.save();
+            const mensagem = resultado.rows[0];
 
             io.emit('chat_message', {
-                _id: mensagem._id,
+                id: mensagem.id,
                 de: usuarioAtual,
                 msg: dados.msg,
-                timestamp: mensagem.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                timestamp: new Date(mensagem.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
             });
 
             console.log(`[GLOBAL] ${usuarioAtual}: ${dados.msg}`);
@@ -322,22 +361,19 @@ io.on('connection', (socket) => {
         try {
             const { para, msg } = dados;
 
-            const mensagem = new Mensagem({
-                de: usuarioAtual,
-                para: para,
-                msg: msg,
-                tipo: 'texto',
-                timestamp: new Date()
-            });
+            const resultado = await pool.query(
+                'INSERT INTO mensagens (de, para, msg, tipo, timestamp) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP) RETURNING *',
+                [usuarioAtual, para, msg, 'texto']
+            );
 
-            await mensagem.save();
+            const mensagem = resultado.rows[0];
 
             const dados_envio = {
-                _id: mensagem._id,
+                id: mensagem.id,
                 de: usuarioAtual,
                 para: para,
                 msg: msg,
-                timestamp: mensagem.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                timestamp: new Date(mensagem.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
             };
 
             socket.emit('private_message', dados_envio);
@@ -356,23 +392,20 @@ io.on('connection', (socket) => {
         try {
             const { para, imagemUrl } = dados;
 
-            const mensagem = new Mensagem({
-                de: usuarioAtual,
-                para: para || 'global',
-                tipo: 'imagem',
-                imagemUrl: imagemUrl,
-                timestamp: new Date()
-            });
+            const resultado = await pool.query(
+                'INSERT INTO mensagens (de, para, tipo, imagem_url, timestamp) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP) RETURNING *',
+                [usuarioAtual, para || 'global', 'imagem', imagemUrl]
+            );
 
-            await mensagem.save();
+            const mensagem = resultado.rows[0];
 
             const dados_envio = {
-                _id: mensagem._id,
+                id: mensagem.id,
                 de: usuarioAtual,
                 para: para || 'global',
                 tipo: 'imagem',
                 imagemUrl: imagemUrl,
-                timestamp: mensagem.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                timestamp: new Date(mensagem.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
             };
 
             if (para && para !== 'global') {
@@ -393,17 +426,16 @@ io.on('connection', (socket) => {
         try {
             const { para } = dados;
 
-            const chamada = new Chamada({
-                de: usuarioAtual,
-                para: para,
-                status: 'pendente'
-            });
+            const resultado = await pool.query(
+                'INSERT INTO chamadas (de, para, status, criada_em) VALUES ($1, $2, $3, CURRENT_TIMESTAMP) RETURNING *',
+                [usuarioAtual, para, 'pendente']
+            );
 
-            await chamada.save();
+            const chamada = resultado.rows[0];
 
             io.to(`usuario_${para}`).emit('chamada_recebida', {
                 de: usuarioAtual,
-                chamadaId: chamada._id
+                chamadaId: chamada.id
             });
 
             console.log(`[CHAMADA] ${usuarioAtual} → ${para}`);
@@ -419,7 +451,10 @@ io.on('connection', (socket) => {
         try {
             const { chamadaId, de } = dados;
 
-            await Chamada.findByIdAndUpdate(chamadaId, { status: 'aceita' });
+            await pool.query(
+                'UPDATE chamadas SET status = $1 WHERE id = $2',
+                ['aceita', chamadaId]
+            );
 
             io.to(`usuario_${de}`).emit('chamada_aceita', {
                 chamadaId: chamadaId,
@@ -439,7 +474,10 @@ io.on('connection', (socket) => {
         try {
             const { chamadaId, de } = dados;
 
-            await Chamada.findByIdAndUpdate(chamadaId, { status: 'recusada' });
+            await pool.query(
+                'UPDATE chamadas SET status = $1 WHERE id = $2',
+                ['recusada', chamadaId]
+            );
 
             io.to(`usuario_${de}`).emit('chamada_recusada', {
                 chamadaId: chamadaId
@@ -485,11 +523,10 @@ io.on('connection', (socket) => {
         try {
             const { chamadaId, duracao } = dados;
 
-            await Chamada.findByIdAndUpdate(chamadaId, {
-                status: 'finalizada',
-                duracao: duracao,
-                finalizadaEm: new Date()
-            });
+            await pool.query(
+                'UPDATE chamadas SET status = $1, duracao = $2, finalizada_em = CURRENT_TIMESTAMP WHERE id = $3',
+                ['finalizada', duracao, chamadaId]
+            );
 
             io.emit('chamada_finalizada', { chamadaId });
         } catch (erro) {
